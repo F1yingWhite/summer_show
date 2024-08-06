@@ -1,9 +1,11 @@
 import json
 import warnings
 
+import pandas as pd
 import torch
 from flask import Blueprint, Response, request
 
+from models import mutilmodel
 from utils.mutilmodel.dataprepare import prepare_dicom, prepare_pathology
 
 warnings.filterwarnings("ignore")
@@ -15,6 +17,7 @@ from models.mutilmodel.ResNet3d import ResNet, generate_model
 # 创建 Blueprint
 multimodal = Blueprint("multimodal", __name__, url_prefix="/api/multimodal")
 
+# 初始化模型
 device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
 pathology_feat_size = 2048
 feature_path = "./checkpoints/joint_model/kmeans.pth"
@@ -32,6 +35,9 @@ joint_model = JointModel(
 joint_model.load_state_dict(torch.load("./checkpoints/joint_model/joint_model.pth"))
 joint_model.eval()
 
+# 获取可用的wsi和dicom列表
+wsi_list = pd.read_csv("./static/wsi_list.csv")
+
 
 @multimodal.route("/predict", methods=["POST"])
 def predict():
@@ -45,3 +51,12 @@ def predict():
         output = joint_model(dicom, pathology, pathology_mask)
     output = output.cpu().numpy()
     return Response(json.dumps(output.tolist()), mimetype="application/json")
+
+
+@mutilmodel.route("/wsi_lists", methods=["GET"])
+def wsi_lists():
+    """
+    获取所有的WSI列表
+    :return: WSI列表
+    """
+    return Response(json.dumps(wsi_list), mimetype="application/json")

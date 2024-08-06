@@ -1,54 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RightCircleTwoTone } from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu, theme, Button } from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
-import { isLogin } from '../../utils/authorize';
 const { Content, Sider } = Layout;
-
 
 export function Dashboard() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (!isLogin()) {
-      navigate('/manage/login');
-    }
-  }, [navigate]);
-
-  const renderMenuItems = (menuData, userPrivilege) => {
-    const menus = JSON.parse(menuData);
-
-    const buildMenuItems = (menus, parent = "") => {
-      const result = [];
-      for (const menu of menus) {
-        if (
-          menu.parent === parent &&
-          (menu.parent === "" || !menu.allowUser || menu.allowUser.includes(userPrivilege))
-        ) {
-          const children = buildMenuItems(menus, menu.title);
-          const menuItem = {
-            key: menu.title,
-            label: menu.title,
-            children: children.length > 0 ? children : null,
-            onClick: () => {
-              if (menu.path) {
-                navigate("/manage/dashboard" + menu.path);
-              }
-            },
-          };
-          result.push(menuItem);
-        }
-      }
-      return result;
-    };
-
-    let items = buildMenuItems(menus);
-    return items;
-  };
-
-  const items = renderMenuItems(localStorage.getItem("menus"), localStorage.getItem("privilege"));
 
   const pathItems = useLocation().pathname.split('/').filter(item => item);
   const pathLength = pathItems.length;
@@ -60,6 +20,25 @@ export function Dashboard() {
       <Link to={`/${pathItems.slice(0, index + 1).join('/')}`}>{item}</Link>
     )
   }));
+
+  const items = [
+    {
+      key: '1',
+      label: 'Dashboard',
+      icon: <RightCircleTwoTone />,
+      children: [
+        {
+          key: '1-1',
+          label: <Link to="/dashboard/mutilmodal">Mutil Modal</Link>,
+        },
+        {
+          key: '1-2',
+          label: <Link to="/dashboard/survival_prediction">Survival Prediction</Link>,
+        },
+      ],
+    },
+  ];
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Layout>
@@ -69,7 +48,7 @@ export function Dashboard() {
           <Menu
             mode="inline"
             defaultSelectedKeys={['1']}
-            defaultOpenKeys={['权限管理']}
+            defaultOpenKeys={['1']}
             style={{
               height: '100%',
               borderRight: 0,
@@ -114,5 +93,3 @@ export function Dashboard() {
     </Layout>
   );
 };
-
-
