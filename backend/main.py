@@ -8,7 +8,7 @@ from flask_cors import CORS
 from utils.wsi_tile import convert_wsi_to_dzi
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(app)
 
 app.register_blueprint(multimodal)
 app.register_blueprint(survival_prediction)
@@ -50,8 +50,4 @@ def upload_dicom():
 
 
 if __name__ == "__main__":
-    path = "./static/wsi"
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            convert_wsi_to_dzi(f'{path}/{file}', f'static/dzi/{file}/image')
-    # app.run(port=9002, debug=True)
+    app.run(port=9002)

@@ -14,6 +14,6 @@ const OpenSeadragonViewer = ({ tileSource }) => {
 			viewerRef.current.destroy();
 		};
 	}, [tileSource]);
-	return <div id="viewer" style={{ width: '100%', height: '50%' }} />;
+	return <div id="viewer" style={{ width: '100%', height: '100vh' }} />;
 };
 export default OpenSeadragonViewer;
