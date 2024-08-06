@@ -1,22 +1,15 @@
 {
-  "name": "my-app",
+  "name": "svs-viewer",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "antd": "^5.17.4",
-    "crypto-js": "^4.2.0",
-    "file-loader": "^6.2.0",
-    "fs": "^0.0.1-security",
     "openseadragon": "^4.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
-    "typescript": "^5.4.5",
-    "uuid": "^9.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -42,8 +35,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "tailwindcss": "^3.4.3"
   }
 }
