@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Slider, Alert } from 'antd';
 
@@ -9,6 +9,9 @@ const NiiImageViewer = ({ niiname }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const totalSlices = 50;
+
+  const imageRef = useRef(null);
+  const [sliderWidth, setSliderWidth] = useState(300);
 
   const fetchImage = useCallback(async (sliceIndex) => {
     setError(null);
@@ -30,6 +33,12 @@ const NiiImageViewer = ({ niiname }) => {
     fetchImage(index);
   }, [fetchImage, index]);
 
+  useEffect(() => {
+    if (imageRef.current) {
+      setSliderWidth(imageRef.current.clientWidth);
+    }
+  }, [imageSrc]);
+
   const handleSliderChange = (value) => {
     setIndex(value);
   };
@@ -45,6 +54,7 @@ const NiiImageViewer = ({ niiname }) => {
       <div style={{ position: 'relative' }}>
         {imageSrc && (
           <img
+            ref={imageRef}
             src={imageSrc}
             alt={`Slice ${index}`}
             style={{ maxWidth: '100%', maxHeight: '600px' }}
@@ -66,6 +76,7 @@ const NiiImageViewer = ({ niiname }) => {
           value={index}
           onChange={handleSliderChange}
           tooltip={{ formatter: (value) => `Slice: ${value + 1}` }}
+          style={{ width: sliderWidth }}
         />
         <p>Slice: {index + 1} / {totalSlices}</p>
       </div>

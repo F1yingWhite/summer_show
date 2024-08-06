@@ -24,19 +24,34 @@ export function Dashboard() {
   const items = [
     {
       key: '1',
-      label: 'Dashboard',
+      label: 'MutilModal',
       icon: <RightCircleTwoTone />,
       children: [
         {
           key: '1-1',
-          label: <Link to="/dashboard/mutilmodal">Mutil Modal</Link>,
+          label: <Link to="/dashboard/wsi_prediction">wsi prediction</Link>,
         },
         {
           key: '1-2',
-          label: <Link to="/dashboard/survival_prediction">Survival Prediction</Link>,
+          label: <Link to="/dashboard/dicom_prediction">dicom prediction</Link>,
         },
+        {
+          key: '1-3',
+          label: <Link to="/dashboard/mutilmodal">MutilModal</Link>,
+        }
       ],
     },
+    {
+      key: '2',
+      label: 'Survival Prediction',
+      icon: <RightCircleTwoTone />,
+      children: [
+        {
+          key: '2-1',
+          label: <Link to="/dashboard/survival_prediction">Survival Prediction</Link>,
+        }
+      ]
+    }
   ];
 
   return (

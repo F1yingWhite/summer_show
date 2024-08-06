@@ -1,4 +1,4 @@
-import { Button, message as messageApi, Upload, UploadProps, Progress } from "antd";
+import { Button, message as messageApi, Upload, Spin, Progress } from "antd";
 import OpenSeadragonViewer from "../components/OpenSeaDragonViewer";
 import axios from 'axios';
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ export function WSIPrediction() {
   const [wsiList, setWsiList] = useState([]);
   const [fileList, setFileList] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [predictState, setPredictState] = useState(false);
 
   const featchWsiList = async () => {
     axios.get('http://10.130.128.52:10023/api/multimodal/wsi_lists')
@@ -29,15 +30,21 @@ export function WSIPrediction() {
   };
 
   const handlePrediction = () => {
-    const loadingMessage = messageApi.loading('Action in progress..', 0);
-    axios.post('http://10.130.128.52:10023/api/multimodal/prediction')
+    if (!tileSource) {
+      messageApi.error('Please select a pathology image first.');
+      return;
+    }
+    setPredictState(true);
+    axios.post('http://10.130.128.52:10023/api/multimodal/predict_wsi', {
+      wsi_name: tileSource,
+    })
       .then(res => {
-        loadingMessage();
+        setPredictState(false);
         console.log(res.data);
-        messageApi.success(`Prediction successful, result: ${res.data.result}`);
+        messageApi.success(`Prediction successful, result: ${res.data}`);
       })
       .catch(err => {
-        loadingMessage();
+        setPredictState(false);
         console.log(err);
         messageApi.error('Prediction failed. Please try again.');
       });
@@ -93,6 +100,7 @@ export function WSIPrediction() {
 
   return (
     <div style={styles.container}>
+      <Spin spinning={predictState} fullscreen />
       <label htmlFor="wsi-select" style={styles.label}>Select pathology image:</label>
       <select id="wsi-select" onChange={handleSelectChange} style={styles.select}>
         <option value="">Please select a pathology image</option>

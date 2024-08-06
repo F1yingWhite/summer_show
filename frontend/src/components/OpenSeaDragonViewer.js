@@ -7,7 +7,7 @@ const OpenSeadragonViewer = ({ tileSource }) => {
 		const viewer = OpenSeadragon({
 			id: 'viewer',
 			prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/images/',
-			tileSources: `http://localhost:9002/static/dzi/${tileSource}/image.dzi`,
+			tileSources: `http://10.130.128.52:10023/static/dzi/${tileSource}/image.dzi`,
 		});
 		viewerRef.current = viewer;
 		return () => {
