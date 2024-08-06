@@ -1,7 +1,7 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { Dashboard } from "../pages/Dashboard";
 import { NotFound } from "../pages/404";
-import { Mutilmodal } from "../pages/Mutilmodal";
+import { Multimodal } from "../pages/Mutilmodal";
 import { SurvivalPrediction } from "../pages/SurvivalPrediction";
 
 const router = createBrowserRouter([
@@ -11,7 +11,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "mutilmodal",
-        element: <Mutilmodal></Mutilmodal>
+        element: <Multimodal></Multimodal>
       },
       {
         path: "survival_prediction",
