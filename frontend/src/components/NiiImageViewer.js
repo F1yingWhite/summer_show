@@ -78,7 +78,6 @@ const NiiImageViewer = ({ niiname }) => {
           tooltip={{ formatter: (value) => `Slice: ${value + 1}` }}
           style={{ width: sliderWidth }}
         />
-        <p>Slice: {index + 1} / {totalSlices}</p>
       </div>
     </div>
   );
