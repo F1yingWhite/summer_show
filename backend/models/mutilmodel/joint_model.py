@@ -13,37 +13,32 @@ class JointModel(torch.nn.Module):
         self,
         pathology_model: mil.MILNet,
         dicom_model: ResNet,
-        pathology_size=2048,
-        dicom_size=2048,
         pathology_model_extractor_grad=False,
         dicom_model_extractor_grad=False,
     ):
         super(JointModel, self).__init__()
-        self.pathology_size = pathology_size
-        self.dicom_size = dicom_size
         self.pathology_model = pathology_model
         self.dicom_model = dicom_model
-        self.fc1 = torch.nn.Linear(dicom_size * 2, dicom_size)  # 统一构建为4096维度的向量
+        self.fc1 = torch.nn.Linear(4096, 2048)  # 统一构建为4096维度的向量
         self.relu = torch.nn.ReLU()
         self.dropout = torch.nn.Dropout()
-        self.fc2 = torch.nn.Linear(dicom_size, 2)
+        self.fc2 = torch.nn.Linear(2048, 2)
         # 对bag_embedding进行重构后再拼接在一起
-        # 直接计算病理的
         self.pre_fc = torch.nn.Sequential(
-            torch.nn.Conv1d(2, 2, kernel_size=2, stride=2),
+            torch.nn.Conv1d(2, 2, kernel_size=4, stride=4),
             torch.nn.ReLU(),
             torch.nn.Flatten(),
-        )  # batch_size x 2 x pathology_size -> batch_size x 2 x (pathology_size/2) -> batch_size x pathology_size
+        )  # 1 x 2 x 4096 -> 1 x 2 x 1024 -> 1 x 2048
 
         self.after_fc = torch.nn.Sequential(
-            torch.nn.Linear(pathology_size * 2, pathology_size),
+            torch.nn.Linear(8192, 2048),
             torch.nn.ReLU(),
-            torch.nn.Linear(pathology_size, dicom_size),
+            torch.nn.Linear(2048, 2048),
             torch.nn.ReLU(),
         )
 
         self.reconstruction = torch.nn.Sequential(
-            torch.nn.Linear(dicom_size, 512),
+            torch.nn.Linear(2048, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, 20),
         )
@@ -57,8 +52,8 @@ class JointModel(torch.nn.Module):
                 p.requires_grad_(False)
 
     def forward(self, dicom, pathology, pathology_mask, pathology_mean=None):
-        dicom_features = self.dicom_model(dicom, mode="two")  # batchsize, dicom_size
-        pathology_features = torch.zeros(dicom_features.size(0), self.pathology_size).to(dicom.device)
+        dicom_features = self.dicom_model(dicom, mode="two")
+        pathology_features = torch.zeros(dicom_features.size(0), 2048).to(dicom.device)
 
         # 直接计算有病理特征的那些样本
         for i in range(pathology_mask.size(0)):
@@ -80,7 +75,7 @@ class JointModel(torch.nn.Module):
         return x
 
     def reconstruct_pathology_features(self, dicom_features, pathology_mean):
-        pathology_mean = pathology_mean.expand(dicom_features.shape[0], -1, -1).to("cuda")  # batchsize, pathology_size, 2
+        pathology_mean = pathology_mean.expand(dicom_features.shape[0], -1, -1).to("cuda")  # batchsize, 2048, 2
         weight = self.reconstruction(dicom_features).unsqueeze(-1)
         pathology_feature = pathology_mean @ weight
 

@@ -37,7 +37,7 @@ def prepare_dicom(dicom_path, mode):
     else:
         normalized_tensor = img_list
     img_list = np.array(normalized_tensor)[np.newaxis, ...]  # .transpose(1, 0, 2, 3)
-    normalized_tensor = torch.from_numpy(img_list).float()
+    normalized_tensor = torch.from_numpy(img_list).float().unsqueeze(0)
     return normalized_tensor
 
 

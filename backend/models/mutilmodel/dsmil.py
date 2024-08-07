@@ -82,7 +82,7 @@ class MILNet(nn.Module):
 
 def init_model(
     feat_size=4096,
-    num_class=2,
+    num_class=1,
     lr=1e-4,
     weight_decay=1e-3,
     max_epoch=50,
