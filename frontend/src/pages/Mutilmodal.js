@@ -24,7 +24,7 @@ export function MultimodalData() {
         console.log(err);
         setLoading(false);
       });
-  }
+  };
 
   useEffect(() => {
     fetchData();
@@ -53,9 +53,17 @@ export function MultimodalData() {
     return isValidType;
   };
 
+  const getUploadUrl = (file) => {
+    const fileType = file.name.split('.').pop().toLowerCase();
+    if (fileType === 'nii') {
+      return 'http://10.130.128.52:10023/api/nii/upload';
+    } else {
+      return 'http://10.130.128.52:10023/api/wsi/upload';
+    }
+  };
+
   const uploadProps = {
     name: 'file',
-    action: 'http://10.130.128.52:10023/api/wsi/upload',
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -64,12 +72,14 @@ export function MultimodalData() {
     customRequest: async ({ file, onSuccess, onError, onProgress }) => {
       const formData = new FormData();
       formData.append('file', file);
+      const uploadUrl = getUploadUrl(file);
       try {
-        await axios.post('http://10.130.128.52:10023/api/wsi/upload', formData, {
+        await axios.post(uploadUrl, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
           onUploadProgress: handleUploadProgress
         });
         onSuccess?.(file);
+        fetchData();  // Refresh data after upload
       } catch (err) {
         onError?.(err);
       }
@@ -89,7 +99,6 @@ export function MultimodalData() {
   };
 
   const handlePredict = (nii_name, wsi_name) => {
-    // Add your prediction logic here
     setLoading(true);
     axios.post('http://10.130.128.52:10023/api/multimodal/predict_mutil', { nii_name, wsi_name })
       .then(res => {
@@ -103,16 +112,50 @@ export function MultimodalData() {
       });
   };
 
+  const renderUploadButton = (record, type) => {
+    const uploadPropsForCell = {
+      ...uploadProps,
+      customRequest: async ({ file, onSuccess, onError }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('pair_name', type === 'nii' ? record.wsi_name : record.nii_name);
+        const uploadUrl = 'http://10.130.128.52:10023/api/multimodal/upload_pair';
+        try {
+          await axios.post(uploadUrl, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            onUploadProgress: handleUploadProgress
+          });
+          onSuccess?.(file);
+          fetchData();  // Refresh data after upload
+        } catch (err) {
+          onError?.(err);
+        }
+      },
+    };
+
+    return (
+      <Upload {...uploadPropsForCell}>
+        <Button icon={<UploadOutlined />}>Upload {type.toUpperCase()}</Button>
+      </Upload>
+    );
+  };
+
   const columns = [
     {
       title: 'NII Name',
       dataIndex: 'nii_name',
       key: 'nii_name',
+      render: (text, record) => (
+        text === '-' ? renderUploadButton(record, 'nii') : text
+      ),
     },
     {
       title: 'WSI Name',
       dataIndex: 'wsi_name',
       key: 'wsi_name',
+      render: (text, record) => (
+        text === '-' ? renderUploadButton(record, 'svs') : text
+      ),
     },
     {
       title: 'Actions',
@@ -130,9 +173,9 @@ export function MultimodalData() {
   return (
     <div style={styles.container}>
       <Spin spinning={loading} fullscreen />
-      {/* <Upload {...uploadProps}>
+      <Upload {...uploadProps}>
         <Button icon={<UploadOutlined />} style={styles.button}>Upload File</Button>
-      </Upload> */}
+      </Upload>
       {uploadProgress > 0 && uploadProgress < 100 && (
         <Progress percent={uploadProgress} style={styles.progress} />
       )}
@@ -142,7 +185,8 @@ export function MultimodalData() {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        width="80%"
+        width="40%"
+        height="40%"
       >
         {modalContent}
       </Modal>
