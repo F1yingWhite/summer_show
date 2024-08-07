@@ -90,7 +90,17 @@ export function MultimodalData() {
 
   const handlePredict = (nii_name, wsi_name) => {
     // Add your prediction logic here
-    messageApi.info(`Predicting for NII: ${nii_name} and WSI: ${wsi_name}`);
+    setLoading(true);
+    axios.post('http://10.130.128.52:10023/api/multimodal/predict_mutil', { nii_name, wsi_name })
+      .then(res => {
+        messageApi.success('Prediction successful, result: ' + res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.log(err);
+        messageApi.error('Prediction failed');
+        setLoading(false);
+      });
   };
 
   const columns = [
@@ -120,9 +130,9 @@ export function MultimodalData() {
   return (
     <div style={styles.container}>
       <Spin spinning={loading} fullscreen />
-      <Upload {...uploadProps}>
+      {/* <Upload {...uploadProps}>
         <Button icon={<UploadOutlined />} style={styles.button}>Upload File</Button>
-      </Upload>
+      </Upload> */}
       {uploadProgress > 0 && uploadProgress < 100 && (
         <Progress percent={uploadProgress} style={styles.progress} />
       )}
